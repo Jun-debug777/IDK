@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Powder Physics Sandbox</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+        }
+        #sidebar {
+            width: 250px;
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; /* Enable vertical scrolling */
+            height: 100vh; /* Full viewport height */
+        }
+        #sandbox {
+            flex: 1;
+            background: #000;
+        }
+        .button {
+            margin: 5px;
+            padding: 10px;
+            background: #444;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+        }
+        .button:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <button class="button" data-element="sand">Sand</button>
+        <button class="button" data-element="water">Water</button>
+        <button class="button" data-element="fire">Fire</button>
+        <button class="button" data-element="oil">Oil</button>
+        <button class="button" data-element="acid">Acid</button>
+        <button class="button" data-element="snow">Snow</button>
+        <button class="button" data-element="metal">Metal</button>
+        <button class="button" data-element="stone">Stone</button>
+        <button class="button" data-element="wood">Wood</button>
+        <button class="button" data-element="glass">Glass</button>
+        <button class="button" data-element="gas">Gas</button>
+        <button class="button" data-element="lava">Lava</button>
+        <button class="button" data-element="mud">Mud</button>
+        <button class="button" data-element="salt">Salt</button>
+        <button class="button" data-element="plant">Plant</button>
+        <button class="button" data-element="ice">Ice</button>
+        <button class="button" data-element="rust">Rust</button>
+        <button class="button" data-element="gel">Gel</button>
+        <button class="button" data-element="slime">Slime</button>
+        <button class="button" data-element="sandstone">Sandstone</button>
+        <button class="button" data-element="coal">Coal</button>
+        <button class="button" data-element="crystal">Crystal</button>
+        <button class="button" data-element="plastic">Plastic</button>
+        <button class="button" data-element="air">Air</button>
+        <button class="button" data-element="plasma">Plasma</button>
+        <button class="button" data-element="vapor">Vapor</button>
+        <button class="button" data-element="concrete">Concrete</button>
+        <button class="button" data-element="sulfur">Sulfur</button>
+        <button class="button" data-element="sugar">Sugar</button>
+        <button class="button" data-element="wool">Wool</button>
+        <button class="button" data-element="feather">Feather</button>
+        <button class="button" data-element="sandpaper">Sandpaper</button>
+        <button class="button" data-element="ash">Ash</button>
+    </div>
+    <canvas id="sandbox"></canvas>
+    <script>
+        const canvas = document.getElementById('sandbox');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth - 250;
+        canvas.height = window.innerHeight;
+
+        // Element properties
+        const elements = {
+            sand: { color: '#c2b280', gravity: 0.1, friction: 0.99, isLiquid: false },
+            water: { color: '#00f', gravity: 0.05, friction: 0.97, isLiquid: true },
+            fire: { color: '#f00', gravity: 0, friction: 0.99, isLiquid: false },
+            oil: { color: '#444', gravity: 0.02, friction: 0.95, isLiquid: true },
+            acid: { color: '#0f0', gravity: 0.1, friction: 0.95, isLiquid: true },
+            snow: { color: '#fff', gravity: 0.05, friction: 0.99, isLiquid: false },
+            metal: { color: '#888', gravity: 0.1, friction: 0.9, isLiquid: false },
+            stone: { color: '#777', gravity: 0.1, friction: 0.8, isLiquid: false },
+            wood: { color: '#a52a2a', gravity: 0.1, friction: 0.95, isLiquid: false },
+            glass: { color: '#ccc', gravity: 0.1, friction: 0.9, isLiquid: false },
+            gas: { color: '#aaa', gravity: 0, friction: 0.99, isLiquid: false },
+            lava: { color: '#f90', gravity: 0.2, friction: 0.8, isLiquid: true },
+            mud: { color: '#804000', gravity: 0.15, friction: 0.85, isLiquid: true },
+            salt: { color: '#fff', gravity: 0.1, friction: 0.9, isLiquid: false },
+            plant: { color: '#0f0', gravity: 0.1, friction: 0.95, isLiquid: false },
+            ice: { color: '#b0e0e6', gravity: 0.1, friction: 0.98, isLiquid: false },
+            rust: { color: '#b7410e', gravity: 0.1, friction: 0.9, isLiquid: false },
+            gel: { color: '#8a2be2', gravity: 0.1, friction: 0.97, isLiquid: true },
+            slime: { color: '#228b22', gravity: 0.1, friction: 0.9, isLiquid: true },
+            sandstone: { color: '#d2b48c', gravity: 0.1, friction: 0.8, isLiquid: false },
+            coal: { color: '#2f4f4f', gravity: 0.1, friction: 0.85, isLiquid: false },
+            crystal: { color: '#00ced1', gravity: 0.1, friction: 0.9, isLiquid: false },
+            plastic: { color: '#ff69b4', gravity: 0.1, friction: 0.9, isLiquid: false },
+            air: { color: '#e0ffff', gravity: 0, friction: 0.99, isLiquid: false },
+            plasma: { color: '#ff4500', gravity: 0.1, friction: 0.8, isLiquid: true },
+            vapor: { color: '#d3d3d3', gravity: 0, friction: 0.98, isLiquid: false },
+            concrete: { color: '#a9a9a9', gravity: 0.1, friction: 0.85, isLiquid: false },
+            sulfur: { color: '#ffd700', gravity: 0.1, friction: 0.9, isLiquid: false },
+            sugar: { color: '#fff5ee', gravity: 0.1, friction: 0.95, isLiquid: false },
+            wool: { color: '#d3d3d3', gravity: 0.1, friction: 0.95, isLiquid: false },
+            feather: { color: '#f5f5dc', gravity: 0.05, friction: 0.99, isLiquid: false },
+            sandpaper: { color: '#a0522d', gravity: 0.1, friction: 0.8, isLiquid: false },
+            ash: { color: '#b0c4de', gravity: 0.1, friction: 0.9, isLiquid: false }
+        };
+
+        let selectedElement = 'sand';
+        const particleSize = 4;
+        const particles = [];
+
+        let isMouseDown = false;
+
+        // Particle constructor
+        function Particle(x, y) {
+            this.x = x;
+            this.y = y;
+            this.vx = (Math.random() - 0.5) * 2;
+            this.vy = (Math.random() - 0.5) * 2;
+            this.color = elements[selectedElement].color;
+            this.gravity = elements[selectedElement].gravity;
+            this.friction = elements[selectedElement].friction;
+            this.isLiquid = elements[selectedElement].isLiquid;
+        }
+
+        // Particle drawing
+        Particle.prototype.draw = function() {
+            ctx.fillStyle = this.color;
+            ctx.fillRect(this.x, this.y, particleSize, particleSize);
+        };
+
+        // Particle updating
+        Particle.prototype.update = function() {
+            this.vy += this.gravity; // Apply gravity
+            this.vx *= this.friction; // Apply friction
+            this.vy *= this.friction; // Apply friction
+            this.x += this.vx;
+            this.y += this.vy;
+
+            // Boundary collision
+            if (this.y + particleSize > canvas.height) {
+                this.y = canvas.height - particleSize;
+                this.vy *= -0.6; // Bounce off the ground
+            }
+            if (this.x + particleSize > canvas.width) {
+                this.x = canvas.width - particleSize;
+                this.vx *= -0.6; // Bounce off the right wall
+            }
+            if (this.x < 0) {
+                this.x = 0;
+                this.vx *= -0.6; // Bounce off the left wall
+            }
+            if (this.y < 0) {
+                this.y = 0;
+                this.vy *= -0.6; // Bounce off the top wall
+            }
+
+            // Liquid behavior
+            if (this.isLiquid) {
+                for (let i = 0; i < particles.length; i++) {
+                    const other = particles[i];
+                    if (other !== this && other.isLiquid) {
+                        const dx = this.x - other.x;
+                        const dy = this.y - other.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+
+                        if (distance < particleSize) {
+                            const angle = Math.atan2(dy, dx);
+                            this.vx += Math.cos(angle) * 0.1;
+                            this.vy += Math.sin(angle) * 0.1;
+                        }
+                    }
+                }
+            }
+
+            // Interaction with other elements
+            for (let i = 0; i < particles.length; i++) {
+                const other = particles[i];
+                if (other !== this) {
+                    const dx = this.x - other.x;
+                    const dy = this.y - other.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < particleSize) {
+                        // Simple collision response
+                        const angle = Math.atan2(dy, dx);
+                        this.vx -= Math.cos(angle) * 0.1;
+                        this.vy -= Math.sin(angle) * 0.1;
+                        other.vx += Math.cos(angle) * 0.1;
+                        other.vy += Math.sin(angle) * 0.1;
+
+                        // Special interactions
+                        if (this.color === '#f00' && other.color === '#00f') { // Fire and Water interaction
+                            this.color = '#ff8c00'; // Steam
+                            other.color = '#ffffff'; // Water evaporates
+                        }
+                    }
+                }
+            }
+        };
+
+        // Animation loop
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Update and draw particles
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // Add particles on mouse hold
+        canvas.addEventListener('mousedown', (event) => {
+            isMouseDown = true;
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            for (let i = 0; i < 10; i++) { // Add multiple particles
+                particles.push(new Particle(x, y));
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isMouseDown = false;
+        });
+
+        canvas.addEventListener('mousemove', (event) => {
+            if (isMouseDown) {
+                const rect = canvas.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                for (let i = 0; i < 10; i++) { // Add multiple particles
+                    particles.push(new Particle(x, y));
+                }
+            }
+        });
+
+        // Sidebar button event listener
+        document.querySelectorAll('.button').forEach(button => {
+            button.addEventListener('click', (event) => {
+                selectedElement = event.target.getAttribute('data-element');
+            });
+        });
+
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>
